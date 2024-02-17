@@ -1,0 +1,32 @@
+{
+  "folders": [
+    {
+      "path": "./"
+    },
+    {
+      "name": "components",
+      "path": "components"
+    }
+  ],
+  "settings": {
+    "emeraldwalk.runonsave": {
+      "commands": [
+        {
+          "match": "\\.json$|\\.code-workspace$",
+          "cmd": "npm run biome-check ${file}"
+        }
+      ]
+    },
+    "editor.formatOnSave": true,
+    "clang-format.executable": "/opt/homebrew/bin/clang-format",
+    "editor.tabSize": 2,
+    "cSpell.words": [],
+    "files.associations": {
+      "m5unified.h": "c",
+      "task.h": "c"
+    }
+  },
+  "extensions": {
+    "recommendations": []
+  }
+}

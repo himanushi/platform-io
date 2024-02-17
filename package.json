@@ -1,0 +1,12 @@
+{
+  "name": "platform-io",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "biome-check": "biome check --apply"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.5.3"
+  }
+}
