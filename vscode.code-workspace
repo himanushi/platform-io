@@ -22,8 +22,12 @@
     "editor.tabSize": 2,
     "cSpell.words": [],
     "files.associations": {
+      "*.css": "postcss",
       "m5unified.h": "c",
-      "task.h": "c"
+      "task.h": "c",
+      "lv_example_get_started_3.c": "cpp",
+      "lv_example_get_started_2.c": "cpp",
+      "lv_example_get_started_1.c": "cpp"
     }
   },
   "extensions": {
