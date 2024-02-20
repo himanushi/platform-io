@@ -6,6 +6,10 @@
     {
       "name": "components",
       "path": "components"
+    },
+    {
+      "name": "sse",
+      "path": "sse"
     }
   ],
   "settings": {
