@@ -10,6 +10,7 @@ extern const char *WIFI_SSID;
 extern const char *WIFI_PASSWORD;
 
 void setup() {
+  Serial.begin(115200);
   M5.begin();
   display.begin();
   display.setFont(&fonts::lgfxJapanGothic_16);
@@ -29,7 +30,7 @@ void setup() {
   display.println("100文字程度の雑学をお話ししてください。");
   display.println("");
 
-  display.print(completions("100文字程度の雑学をお話ししてください。"));
+  streamCompletions("100文字程度の雑学をお話ししてください。");
 }
 
 void loop() {}
