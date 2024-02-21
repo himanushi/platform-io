@@ -1,10 +1,11 @@
 #include <AudioFileSourceSD.h>
 #include <AudioGeneratorMP3.h>
 #include <AudioOutputI2S.h>
+#include <M5Unified.h>
 
-AudioFileSourceSD *file = new AudioFileSourceSD("/tts.mp3");
-AudioGeneratorMP3 *mp3 = new AudioGeneratorMP3();
-AudioOutputI2S *out = new AudioOutputI2S();
+AudioFileSourceSD *file;
+AudioGeneratorMP3 *mp3;
+AudioOutputI2S *out;
 
 void setup() {
   Serial.begin(115200);
@@ -12,6 +13,10 @@ void setup() {
     Serial.println("SDカードの初期化に失敗しました");
     return;
   }
+
+  file = new AudioFileSourceSD("/tts.mp3");
+  mp3 = new AudioGeneratorMP3();
+  out = new AudioOutputI2S();
 
   out->begin();
   mp3->begin(file, out);
