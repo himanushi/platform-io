@@ -22,6 +22,10 @@
     {
       "name": "stackchan",
       "path": "stackchan"
+    },
+    {
+      "name": "server",
+      "path": "server"
     }
   ],
   "settings": {
