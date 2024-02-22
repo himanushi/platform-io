@@ -72,7 +72,7 @@ void streamCompletions(const String &content) {
     String line;
 
     while (stream->available()) {
-      delay(20);
+      delay(15);
       line = stream->readStringUntil('\n');
       if (line.startsWith("data:")) {
         String jsonStr = line.substring(5);

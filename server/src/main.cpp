@@ -1,26 +1,15 @@
 #include <M5Unified.h>
-#include <WebServer.h>
-#include <WiFi.h>
 
-const char *ssid = "M5StackAP";
-const char *password = "123456789";
+#include "setting-server.h"
 
-WebServer server(80);
+M5GFX display;
 
 void setup() {
   M5.begin();
+  display.begin();
   Serial.begin(115200);
 
-  WiFi.softAP(ssid, password);
-  IPAddress IP = WiFi.softAPIP();
-  Serial.print("AP IP address: ");
-  Serial.println(IP);
-
-  server.on("/", HTTP_GET, []() {
-    server.send(200, "application/json", "{\"message\": \"Hello World\"}");
-  });
-
-  server.begin();
+  server_init();
 }
 
-void loop() { server.handleClient(); }
+void loop() { server_handle(); }
