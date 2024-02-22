@@ -7,6 +7,8 @@
 const char *ssid = "M5StackAP";
 const char *password = "123456789";
 
+extern M5GFX display;
+
 WebServer server(80);
 
 const char *html = R"rawliteral(
@@ -14,7 +16,7 @@ const char *html = R"rawliteral(
 <html lang="ja">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0" />
     <title>M5Stack</title>
     <script type="module">
 import van from "/framework.js";
@@ -58,8 +60,12 @@ void server_init() {
 
   server.begin();
 
-  displayQRCode("WIFI:T:WPA;S:" + String(ssid) + ";P:" + String(password) +
-                ";;");
+  display.fillScreen(TFT_BLACK);
+  displayQRCode(
+      "WIFI:T:WPA;S:" + String(ssid) + ";P:" + String(password) + ";;", 10, 10);
+  display.setCursor(0, 150);
+  display.println("  SSID: " + String(ssid));
+  display.println("  Password: " + String(password));
 }
 
 int lastClientCount = 0;
@@ -72,7 +78,11 @@ void server_handle() {
   if (clientCount != lastClientCount) {
     lastClientCount = clientCount;
     if (clientCount > 0) {
-      displayQRCode("http://" + WiFi.softAPIP().toString());
+      display.fillScreen(TFT_BLACK);
+      String url = "  http://" + WiFi.softAPIP().toString();
+      displayQRCode(url, 10, 10);
+      display.setCursor(0, 150);
+      display.println(url);
     }
   }
 }
