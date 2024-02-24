@@ -1,41 +1,45 @@
 {
   "folders": [
     {
-      "path": "./"
+      "path": "./",
     },
     {
       "name": "components",
-      "path": "components"
+      "path": "components",
     },
     {
       "name": "sse",
-      "path": "sse"
+      "path": "sse",
     },
     {
       "name": "tts",
-      "path": "tts"
+      "path": "tts",
     },
     {
       "name": "face",
-      "path": "face"
+      "path": "face",
     },
     {
       "name": "stackchan",
-      "path": "stackchan"
+      "path": "stackchan",
     },
     {
       "name": "server",
-      "path": "server"
-    }
+      "path": "server",
+    },
   ],
   "settings": {
     "emeraldwalk.runonsave": {
       "commands": [
         {
-          "match": "\\.json$|\\.code-workspace$",
-          "cmd": "npm run biome-check ${file}"
-        }
-      ]
+          "match": "\\.json$",
+          "cmd": "npx biome check --apply ${file}",
+        },
+        {
+          "match": "\\.html$|\\.code-workspace$",
+          "cmd": "npx prettier --write ${file}",
+        },
+      ],
     },
     "editor.formatOnSave": true,
     "clang-format.executable": "/opt/homebrew/bin/clang-format",
@@ -47,10 +51,10 @@
       "task.h": "c",
       "lv_example_get_started_3.c": "cpp",
       "lv_example_get_started_2.c": "cpp",
-      "lv_example_get_started_1.c": "cpp"
-    }
+      "lv_example_get_started_1.c": "cpp",
+    },
   },
   "extensions": {
-    "recommendations": []
-  }
+    "recommendations": [],
+  },
 }

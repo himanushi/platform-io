@@ -4,29 +4,36 @@
 #include <WebServer.h>
 #include <WiFi.h>
 
-const char *ssid = "M5StackAP";
-const char *password = "123456789";
+const char *ap_ssid = "M5StackAP";
+const char *ap_password = "123456789";
 
 extern M5GFX display;
 
 WebServer server(80);
 
-const char *js = R"js(
-import van from "/framework.js";
+String js() {
+  String jsCode = R"js(
+const {input, label, div, button} = van.tags;
 
-const {button, span} = van.tags;
-
-const Counter = () => {
-  const counter = van.state(0);
-  return span(
-    "❤️ ", counter, " ",
-    button({onclick: () => ++counter.val}, "👍"),
-    button({onclick: () => --counter.val}, "👎"),
-  );
+const SettingsForm = () => {
+    return div(
+        label("SSID"),
+        input({type: "text", id: "ssid", value: "")},
+        label("PASSWORD"),
+        input({type: "password", id: "password", value: ""}),
+        button({onclick: saveSettings}, "Save")
+    );
 };
 
-van.add(document.body, Counter());
+const saveSettings = () => {
+    // ここで設定を保存する処理を実装
+};
+
+van.add(document.body, SettingsForm());
 )js";
+
+  return jsCode;
+}
 
 String html = R"html(
 <!DOCTYPE html>
@@ -36,7 +43,11 @@ String html = R"html(
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0" />
     <title>M5Stack</title>
     <script type="module">
-    )html" + String(js) +
+      import van from "/framework.js";
+      window.van = van;
+    </script>
+    <script type="module">
+    )html" + js() +
               R"html(
     </script>
 </head>
@@ -54,7 +65,7 @@ let e,t,l,o,r,n=Object,f=n.getPrototypeOf,s=document,a={isConnected:1},i={},d=f(
 )js";
 
 void server_init() {
-  WiFi.softAP(ssid, password);
+  WiFi.softAP(ap_ssid, ap_password);
   IPAddress IP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(IP);
@@ -66,11 +77,12 @@ void server_init() {
   server.begin();
 
   display.fillScreen(TFT_BLACK);
-  displayQRCode(
-      "WIFI:T:WPA;S:" + String(ssid) + ";P:" + String(password) + ";;", 10, 10);
-  display.setCursor(0, 150);
-  display.println("  SSID: " + String(ssid));
-  display.println("  Password: " + String(password));
+  // displayQRCode("WIFI:T:WPA;S:" + String(ap_ssid) +
+  //                   ";P:" + String(ap_password) + ";;",
+  //               10, 10);
+  // display.setCursor(0, 150);
+  // display.println("  SSID: " + String(ap_ssid));
+  // display.println("  Password: " + String(ap_password));
 }
 
 int lastClientCount = 0;
@@ -78,16 +90,16 @@ int lastClientCount = 0;
 void server_handle() {
   server.handleClient();
 
-  int clientCount = WiFi.softAPgetStationNum();
+  // int clientCount = WiFi.softAPgetStationNum();
 
-  if (clientCount != lastClientCount) {
-    lastClientCount = clientCount;
-    if (clientCount > 0) {
-      display.fillScreen(TFT_BLACK);
-      String url = "  http://" + WiFi.softAPIP().toString();
-      displayQRCode(url, 10, 10);
-      display.setCursor(0, 150);
-      display.println(url);
-    }
-  }
+  // if (clientCount != lastClientCount) {
+  //   lastClientCount = clientCount;
+  //   if (clientCount > 0) {
+  //     display.fillScreen(TFT_BLACK);
+  //     String url = "  http://" + WiFi.softAPIP().toString();
+  //     // displayQRCode(url, 10, 10);
+  //     display.setCursor(0, 150);
+  //     display.println(url);
+  //   }
+  // }
 }
