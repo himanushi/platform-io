@@ -6,52 +6,30 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0"
     />
-    <title>M5Stack</title>
+    <title>Easy Setting</title>
+    <link rel="stylesheet" href="/modern-normalize.min.css" />
     <script type="text/javascript" src="/van.min.js"></script>
     <script type="module">
-      const { button, div, pre } = van.tags;
+      const { input, button, div, pre, add, p } = van.tags;
 
-      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-      const Run = ({ sleepMs }) => {
-        const steps = van.state(0);
-        (async () => {
-          for (; steps.val < 40; ++steps.val) await sleep(sleepMs);
-        })();
-        return pre(
-          () =>
-            `${" ".repeat(40 - steps.val)}🚐💨Hello VanJS!${"_".repeat(steps.val)}`,
-        );
+      const Input = (label, value) => {
+        const input = van.input({ type: "password", value });
+        return div(label, input);
       };
 
-      const Hello = () => {
-        const dom = div();
+      const Settings = async () => {
+        const groups = await fetch("/settings.json").then((res) => res.json());
         return div(
-          dom,
-          button(
-            { onclick: () => van.add(dom, Run({ sleepMs: 2000 })) },
-            "Hello 🐌",
-          ),
-          button(
-            { onclick: () => van.add(dom, Run({ sleepMs: 500 })) },
-            "Hello 🐢",
-          ),
-          button(
-            { onclick: () => van.add(dom, Run({ sleepMs: 100 })) },
-            "Hello 🚶‍♂️",
-          ),
-          button(
-            { onclick: () => van.add(dom, Run({ sleepMs: 10 })) },
-            "Hello 🏎️",
-          ),
-          button(
-            { onclick: () => van.add(dom, Run({ sleepMs: 2 })) },
-            "Hello 🚀",
-          ),
+          groups[0].settings.map((setting) => [
+            div(setting.label),
+            input({ type: "password", value: setting.value }),
+          ]),
         );
       };
 
-      van.add(document.body, Hello());
+      (async () => {
+        van.add(document.body, await Settings());
+      })();
     </script>
   </head>
   <body></body>
