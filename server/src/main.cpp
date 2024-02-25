@@ -1,6 +1,9 @@
+#include <ArduinoJson.h>
 #include <M5Unified.h>
 #include <WebServer.h>
 #include <WiFi.h>
+#include <map>
+#include <string>
 
 M5GFX display;
 WebServer server(80);
@@ -35,11 +38,27 @@ import van from "/van.min.js";
 )js";
 
 const char *settingsJson = R"json(
-{"settings": [
-  {"value": null, type: "text", label: "SSID", id: "ssid"},
-  {"value": null, type: "text", label: "Password", id: "ssid"},
-]}
+{"settings":[{"category": "Wi-Fi","settings":[{"value": null, type: "text", label: "SSID", id: "ssid"},{"value": null, type: "text", label: "Password", id: "ssid"}]}]}
 )json";
+
+std::map<std::string, std::string> settings = {{"ssid", ""}, {"password", ""}};
+
+String getSettingsAsJson() {
+  DynamicJsonDocument doc(1024);
+  JsonObject obj = doc.to<JsonObject>();
+
+  for (const auto &setting : settings) {
+    obj[setting.first] = setting.second;
+  }
+
+  String output;
+  serializeJson(doc, output);
+  return output;
+}
+
+void updateSetting(const std::string &key, const std::string &value) {
+  settings[key] = value;
+}
 
 void setup() {
   M5.begin();
@@ -55,8 +74,9 @@ void setup() {
             []() { server.send(200, "application/javascript", vanjs); });
   server.on("/index.js", HTTP_GET,
             []() { server.send(200, "application/javascript", js); });
-  server.on("/settings.json", HTTP_GET,
-            []() { server.send(200, "application/json", settingsJson); });
+  server.on("/settings.json", HTTP_GET, []() {
+    server.send(200, "application/json", getSettingsAsJson());
+  });
 
   server.begin();
 }
