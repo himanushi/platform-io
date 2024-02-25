@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <title>M5Stack</title>
+    <script type="text/javascript" src="/van.min.js"></script>
+    <script type="module">
+      const { button, div, pre } = van.tags;
+
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      const Run = ({ sleepMs }) => {
+        const steps = van.state(0);
+        (async () => {
+          for (; steps.val < 40; ++steps.val) await sleep(sleepMs);
+        })();
+        return pre(
+          () =>
+            `${" ".repeat(40 - steps.val)}🚐💨Hello VanJS!${"_".repeat(steps.val)}`,
+        );
+      };
+
+      const Hello = () => {
+        const dom = div();
+        return div(
+          dom,
+          button(
+            { onclick: () => van.add(dom, Run({ sleepMs: 2000 })) },
+            "Hello 🐌",
+          ),
+          button(
+            { onclick: () => van.add(dom, Run({ sleepMs: 500 })) },
+            "Hello 🐢",
+          ),
+          button(
+            { onclick: () => van.add(dom, Run({ sleepMs: 100 })) },
+            "Hello 🚶‍♂️",
+          ),
+          button(
+            { onclick: () => van.add(dom, Run({ sleepMs: 10 })) },
+            "Hello 🏎️",
+          ),
+          button(
+            { onclick: () => van.add(dom, Run({ sleepMs: 2 })) },
+            "Hello 🚀",
+          ),
+        );
+      };
+
+      van.add(document.body, Hello());
+    </script>
+  </head>
+  <body></body>
+</html>
