@@ -10,20 +10,41 @@
     <link rel="stylesheet" href="/modern-normalize.min.css" />
     <script type="text/javascript" src="/van.min.js"></script>
     <script type="module">
-      const { input, button, div, pre, add, p } = van.tags;
-
-      const Input = (label, value) => {
-        const input = van.input({ type: "password", value });
-        return div(label, input);
-      };
+      const { input, button, div, span, pre, p } = van.tags;
 
       const Settings = async () => {
         const groups = await fetch("/settings.json").then((res) => res.json());
+        const formData = {};
+
+        const onInput = (setting, e) => {
+          formData[setting.key] = e.target.value;
+        };
+
+        const onSave = () => {
+          fetch("/settings", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          })
+            .then((response) => response.json())
+            .then((data) => console.log(data))
+            .catch((error) => console.error("Error:", error));
+        };
+
         return div(
-          groups[0].settings.map((setting) => [
-            div(setting.label),
-            input({ type: "password", value: setting.value }),
-          ]),
+          ...groups.map((group) =>
+            group.settings.map((setting) => [
+              span(setting.label),
+              input({
+                type: setting.type,
+                name: setting.name,
+                oninput: (e) => onInput(setting, e),
+              }),
+            ]),
+          ),
+          button({ onclick: onSave }, "Save"),
         );
       };
 
