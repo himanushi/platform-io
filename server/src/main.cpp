@@ -1,12 +1,12 @@
+#include "ESPAsyncWebServer.h"
 #include <ArduinoJson.h>
 #include <M5Unified.h>
-#include <WebServer.h>
 #include <WiFi.h>
 #include <map>
 #include <string>
 
 M5GFX display;
-WebServer server(80);
+AsyncWebServer server(80);
 
 String html = R"html(
 <!doctype html>
@@ -69,16 +69,50 @@ void setup() {
   Serial.print("AP IP address: ");
   Serial.println(IP);
 
-  server.on("/", HTTP_GET, []() { server.send(200, "text/html", html); });
-  server.on("/van.min.js", HTTP_GET,
-            []() { server.send(200, "application/javascript", vanjs); });
-  server.on("/index.js", HTTP_GET,
-            []() { server.send(200, "application/javascript", js); });
-  server.on("/settings.json", HTTP_GET, []() {
-    server.send(200, "application/json", getSettingsAsJson());
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(200, "text/html", html);
   });
+  server.on("/van.min.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(200, "application/javascript", vanjs);
+  });
+  server.on("/index.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(200, "application/javascript", js);
+  });
+  server.on("/settings", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(200, "application/json", getSettingsAsJson());
+  });
+
+  server.on(
+      "/settings", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
+      [](AsyncWebServerRequest *request, uint8_t *data, size_t len,
+         size_t index, size_t total) {
+        DynamicJsonDocument doc(1024);
+        DeserializationError error = deserializeJson(doc, (const char *)data);
+        if (error) {
+          Serial.print(F("deserializeJson() failed: "));
+          Serial.println(error.c_str());
+          request->send(400, "application/json", "{\"result\":\"error\"}");
+          return;
+        }
+
+        JsonObject obj = doc.as<JsonObject>();
+        for (JsonPair kv : obj) {
+          const char *key = kv.key().c_str();
+          const char *value = kv.value().as<const char *>();
+
+          settings[key] = value;
+        }
+
+        request->send(200, "application/json", "{\"result\":\"success\"}");
+
+        for (const auto &setting : settings) {
+          Serial.print(setting.first.c_str());
+          Serial.print(": ");
+          Serial.println(setting.second.c_str());
+        }
+      });
 
   server.begin();
 }
 
-void loop() { server.handleClient(); }
+void loop() {}
