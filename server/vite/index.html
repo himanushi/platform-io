@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja">
+<html lang="ja" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta
@@ -7,10 +7,10 @@
       content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0"
     />
     <title>Easy Setting</title>
-    <link rel="stylesheet" href="/modern-normalize.min.css" />
+    <link rel="stylesheet" href="/pico.min.css" />
     <script type="text/javascript" src="/van.min.js"></script>
     <script type="module">
-      const { input, button, div, span, pre, p } = van.tags;
+      const { input, button, div, span, pre, h1, h2, label } = van.tags;
 
       const Settings = async () => {
         const groups = await fetch("/settings.json").then((res) => res.json());
@@ -34,24 +34,31 @@
         };
 
         return div(
-          ...groups.map((group) =>
-            group.settings.map((setting) => [
-              span(setting.label),
+          ...groups.map((group) => [
+            h2(group.category),
+            ...group.settings.map((setting) => [
+              label(setting.label),
               input({
                 type: setting.type,
                 name: setting.name,
                 oninput: (e) => onInput(setting, e),
+                autocomplete: "off",
               }),
             ]),
-          ),
+          ]),
           button({ onclick: onSave }, "Save"),
         );
       };
 
       (async () => {
-        van.add(document.body, await Settings());
+        van.add(document.getElementById("main"), [
+          h1("Settings"),
+          await Settings(),
+        ]);
       })();
     </script>
   </head>
-  <body></body>
+  <body>
+    <main id="main" class="container"></main>
+  </body>
 </html>
