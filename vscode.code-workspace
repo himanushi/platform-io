@@ -27,6 +27,10 @@
       "name": "server",
       "path": "server",
     },
+    {
+      "name": "ota",
+      "path": "ota",
+    },
   ],
   "settings": {
     "emeraldwalk.runonsave": {
