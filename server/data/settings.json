@@ -1,0 +1,35 @@
+[
+  {
+    "category": "Wi-Fi",
+    "settings": [
+      { "value": "", "type": "text", "label": "SSID", "key": "wifi_ssid" },
+      {
+        "value": "",
+        "type": "password",
+        "label": "Password",
+        "key": "wifi_password"
+      }
+    ]
+  },
+  {
+    "category": "OpenAI API",
+    "settings": [
+      {
+        "value": "",
+        "type": "password",
+        "label": "API Key",
+        "key": "openai_api_key"
+      },
+      {
+        "value": "gpt-3.5-turbo",
+        "label": "Model",
+        "type": "select",
+        "options": [
+          { "label": "GPT-3.5", "value": "gpt-3.5" },
+          { "label": "GPT-3.5 Turbo", "value": "gpt-3.5-turbo" }
+        ],
+        "key": "openai_model"
+      }
+    ]
+  }
+]
