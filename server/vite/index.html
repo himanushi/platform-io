@@ -6,19 +6,25 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0"
     />
-    <title>Easy Setting</title>
-    <link rel="stylesheet" href="/pico.min.css" />
-    <script type="text/javascript" src="/van.min.js"></script>
+    <title>Settings</title>
+    <link rel="stylesheet" href="/settings/pico.min.css" />
+    <script type="text/javascript" src="/settings/van.min.js"></script>
     <script type="module">
-      const { input, button, div, span, pre, h1, h2, label } = van.tags;
+      const { input, button, div, span, pre, h1, h2, label, select, option } =
+        van.tags;
 
       const Settings = async () => {
-        const groups = await fetch("/settings.json").then((res) => res.json());
-        const formData = {};
+        const groups = await fetch("/settings/options.json")
+          .then((res) => res.json())
+          .catch((error) => []);
+        const values = await fetch("/settings/values.json")
+          .then((res) => res.json())
+          .catch((error) => ({}));
 
-        const onInput = (setting, e) => {
-          formData[setting.key] = e.target.value;
-        };
+        const formData = values;
+
+        const onInput = (setting, e) =>
+          (formData[setting.key] = e.target.value);
 
         const onSave = () => {
           fetch("/settings", {
@@ -33,17 +39,36 @@
             .catch((error) => console.error("Error:", error));
         };
 
+        const Input = ({ setting }) => {
+          if (setting.type === "select") {
+            return select(
+              {
+                name: setting.name,
+                oninput: (e) => onInput(setting, e),
+                value: formData[setting.key] ? formData[setting.key] : null,
+              },
+              setting.options.map((op) =>
+                op.value === formData[setting.key]
+                  ? option({ selected: true, value: op.value }, op.label)
+                  : option({ value: op.value }, op.label),
+              ),
+            );
+          }
+          return input({
+            type: setting.type,
+            name: setting.name,
+            oninput: (e) => onInput(setting, e),
+            autocomplete: "new-password",
+            value: formData[setting.key] ? formData[setting.key] : null,
+          });
+        };
+
         return div(
           ...groups.map((group) => [
             h2(group.category),
             ...group.settings.map((setting) => [
               label(setting.label),
-              input({
-                type: setting.type,
-                name: setting.name,
-                oninput: (e) => onInput(setting, e),
-                autocomplete: "off",
-              }),
+              Input({ setting }),
             ]),
           ]),
           button({ onclick: onSave }, "Save"),
@@ -52,7 +77,7 @@
 
       (async () => {
         van.add(document.getElementById("main"), [
-          h1("Settings"),
+          h1({ style: "--pico-color:var(--pico-primary)" }, "Settings"),
           await Settings(),
         ]);
       })();
