@@ -23,6 +23,7 @@
         "type": "select",
         "defaultValue": "gpt-3.5-turbo",
         "options": [
+          { "label": "GPT-4", "value": "gpt-4" },
           { "label": "GPT-3.5", "value": "gpt-3.5" },
           { "label": "GPT-3.5 Turbo", "value": "gpt-3.5-turbo" }
         ],

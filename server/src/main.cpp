@@ -9,63 +9,6 @@
 M5GFX display;
 AsyncWebServer server(80);
 
-const char *settingsJson = R"json(
-[
-  {
-    "category": "Wi-Fi",
-    "settings": [
-      { "value": "", "type": "text", "label": "SSID", "key": "wifi_ssid" },
-      {
-        "value": "",
-        "type": "password",
-        "label": "Password",
-        "key": "wifi_password"
-      }
-    ]
-  },
-  {
-    "category": "OpenAI API",
-    "settings": [
-      {
-        "value": "",
-        "type": "password",
-        "label": "API Key",
-        "key": "openai_api_key"
-      },
-      {
-        "value": "gpt-3.5-turbo",
-        "label": "Model",
-        "type": "select",
-        "options": [
-          { "label": "GPT-3.5", "value": "gpt-3.5" },
-          { "label": "GPT-3.5 Turbo", "value": "gpt-3.5-turbo" }
-        ],
-        "key": "openai_model"
-      }
-    ]
-  }
-]
-)json";
-
-std::map<std::string, std::string> settings = {{"ssid", ""}, {"password", ""}};
-
-String getSettingsAsJson() {
-  DynamicJsonDocument doc(1024);
-  JsonObject obj = doc.to<JsonObject>();
-
-  for (const auto &setting : settings) {
-    obj[setting.first] = setting.second;
-  }
-
-  String output;
-  serializeJson(doc, output);
-  return output;
-}
-
-void updateSetting(const std::string &key, const std::string &value) {
-  settings[key] = value;
-}
-
 void setup() {
   M5.begin();
   display.begin();
@@ -82,17 +25,22 @@ void setup() {
   }
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(SPIFFS, "/settings/index.html", "text/html");
+    request->send(SPIFFS, "/index.html", "text/html");
   });
   server.on("/van.min.js", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(SPIFFS, "/settings/van.min.js", "application/javascript");
+    request->send(SPIFFS, "/van.min.js", "application/javascript");
   });
   server.on("/pico.min.css", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(SPIFFS, "/settings/pico.min.css", "text/css");
+    request->send(SPIFFS, "/pico.min.css", "text/css");
   });
-  server.on("/settings.json", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(SPIFFS, "/settings/settings.json", "application/json");
-  });
+  server.on(
+      "/setting_options.json", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(SPIFFS, "/setting_options.json", "application/json");
+      });
+  server.on("/setting_values.json", HTTP_GET,
+            [](AsyncWebServerRequest *request) {
+              request->send(SPIFFS, "/setting_values.json", "application/json");
+            });
 
   server.on(
       "/settings", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
@@ -111,17 +59,9 @@ void setup() {
         for (JsonPair kv : obj) {
           const char *key = kv.key().c_str();
           const char *value = kv.value().as<const char *>();
-
-          settings[key] = value;
         }
 
         request->send(200, "application/json", "{\"result\":\"success\"}");
-
-        for (const auto &setting : settings) {
-          Serial.print(setting.first.c_str());
-          Serial.print(": ");
-          Serial.println(setting.second.c_str());
-        }
       });
 
   server.begin();
