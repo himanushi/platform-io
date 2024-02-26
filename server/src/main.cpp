@@ -3,7 +3,6 @@
 #include <M5Unified.h>
 #include <SPIFFS.h>
 #include <WiFi.h>
-#include <esp_task_wdt.h>
 #include <map>
 #include <string>
 
@@ -89,7 +88,7 @@ void setup() {
         if (index + len == total) {
           request->_tempFile.close();
         }
-        request->send(200, "application/json", "{\"result\":\"ok\"}");
+        request->send(200, "application/json", "{\"result\":\"Success!!\"}");
       });
 
   server.begin();
