@@ -41,27 +41,56 @@ void setup() {
             [](AsyncWebServerRequest *request) {
               request->send(SPIFFS, "/setting_values.json", "application/json");
             });
+  server.on(
+      "/check-wifi", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
+      [](AsyncWebServerRequest *request, uint8_t *data, size_t len,
+         size_t index, size_t total) {
+        if (index == 0) {
+          request->_tempObject = new String();
+        }
 
+        if (request->_tempObject) {
+          ((String *)request->_tempObject)->concat((char *)data, len);
+        }
+
+        if (index + len == total) {
+          DynamicJsonDocument doc(1024);
+          deserializeJson(doc, *(String *)request->_tempObject);
+          String ssid = doc["wifi_ssid"];
+          String password = doc["wifi_password"];
+
+          WiFi.begin(ssid.c_str(), password.c_str());
+
+          unsigned long startTime = millis();
+
+          while (WiFi.status() != WL_CONNECTED) {
+            if (millis() - startTime > 5000) {
+              request->send(400, "application/json",
+                            "{\"result\":\"failed to connect\"}");
+              delete (String *)request->_tempObject;
+              return;
+            }
+            delay(500);
+          }
+
+          request->send(200, "application/json", "{}");
+          delete (String *)request->_tempObject;
+        }
+      });
   server.on(
       "/settings", HTTP_POST, [](AsyncWebServerRequest *request) {}, NULL,
       [](AsyncWebServerRequest *request, uint8_t *data, size_t len,
          size_t index, size_t total) {
-        DynamicJsonDocument doc(1024);
-        DeserializationError error = deserializeJson(doc, (const char *)data);
-        if (error) {
-          Serial.print(F("deserializeJson() failed: "));
-          Serial.println(error.c_str());
-          request->send(400, "application/json", "{\"result\":\"error\"}");
-          return;
+        if (!index) {
+          request->_tempFile = SPIFFS.open("/setting_values.json", "w");
         }
-
-        JsonObject obj = doc.as<JsonObject>();
-        for (JsonPair kv : obj) {
-          const char *key = kv.key().c_str();
-          const char *value = kv.value().as<const char *>();
+        if (request->_tempFile) {
+          request->_tempFile.write(data, len);
         }
-
-        request->send(200, "application/json", "{\"result\":\"success\"}");
+        if (index + len == total) {
+          request->_tempFile.close();
+        }
+        request->send(200, "application/json", "{}");
       });
 
   server.begin();

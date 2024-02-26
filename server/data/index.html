@@ -26,6 +26,19 @@
         const onInput = (setting, e) =>
           (formData[setting.key] = e.target.value);
 
+        const onCheckWifi = () => {
+          fetch("/check-wifi", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          })
+            .then((response) => response.json())
+            .then((data) => console.log(data))
+            .catch((error) => console.error("Error:", error));
+        };
+
         const onSave = () => {
           fetch("/settings", {
             method: "POST",
@@ -71,7 +84,11 @@
               Input({ setting }),
             ]),
           ]),
-          button({ onclick: onSave }, "Save"),
+          div(
+            { class: "grid" },
+            button({ onclick: onCheckWifi, type: "submit" }, "Check Wifi"),
+            button({ onclick: onSave, type: "submit" }, "Save"),
+          ),
         );
       };
 

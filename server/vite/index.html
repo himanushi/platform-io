@@ -10,8 +10,7 @@
     <link rel="stylesheet" href="/pico.min.css" />
     <script type="text/javascript" src="/van.min.js"></script>
     <script type="module">
-      const { input, button, div, span, pre, h1, h2, label, select, option } =
-        van.tags;
+      const { tags } = van;
 
       const Settings = async () => {
         const groups = await fetch("/setting_options.json")
@@ -25,6 +24,21 @@
 
         const onInput = (setting, e) =>
           (formData[setting.key] = e.target.value);
+
+        const steps = van.state(0);
+
+        const onCheckWifi = () => {
+          fetch("/check-wifi", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          })
+            .then((response) => response.json())
+            .then((data) => console.log(data))
+            .catch((error) => console.error("Error:", error));
+        };
 
         const onSave = () => {
           fetch("/settings", {
@@ -41,20 +55,23 @@
 
         const Input = ({ setting }) => {
           if (setting.type === "select") {
-            return select(
+            return tags.select(
               {
                 name: setting.name,
                 oninput: (e) => onInput(setting, e),
                 value: formData[setting.key] ? formData[setting.key] : null,
               },
-              setting.options.map((op) =>
-                op.value === formData[setting.key]
-                  ? option({ selected: true, value: op.value }, op.label)
-                  : option({ value: op.value }, op.label),
+              setting.options.map((option) =>
+                option.value === formData[setting.key]
+                  ? tags.option(
+                      { selected: true, value: option.value },
+                      option.label,
+                    )
+                  : tags.option({ value: option.value }, option.label),
               ),
             );
           }
-          return input({
+          return tags.input({
             type: setting.type,
             name: setting.name,
             oninput: (e) => onInput(setting, e),
@@ -63,21 +80,30 @@
           });
         };
 
-        return div(
+        return tags.div(
           ...groups.map((group) => [
-            h2(group.category),
+            tags.h2(group.category),
             ...group.settings.map((setting) => [
-              label(setting.label),
+              tags.label(setting.label),
               Input({ setting }),
             ]),
+            group.category === "Wi-Fi"
+              ? tags.button(
+                  { onclick: onCheckWifi, type: "submit" },
+                  "Check Wifi",
+                )
+              : null,
           ]),
-          button({ onclick: onSave }, "Save"),
+          tags.div(
+            { class: "grid" },
+            tags.button({ onclick: onSave, type: "submit" }, "Save"),
+          ),
         );
       };
 
       (async () => {
         van.add(document.getElementById("main"), [
-          h1({ style: "--pico-color:var(--pico-primary)" }, "Settings"),
+          tags.h1({ style: "--pico-color:var(--pico-primary)" }, "Settings"),
           await Settings(),
         ]);
       })();
