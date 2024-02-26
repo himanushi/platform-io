@@ -10,8 +10,7 @@
     <link rel="stylesheet" href="/pico.min.css" />
     <script type="text/javascript" src="/van.min.js"></script>
     <script type="module">
-      const { input, button, div, span, pre, h1, h2, label, select, option } =
-        van.tags;
+      const { tags } = van;
 
       const Settings = async () => {
         const groups = await fetch("/setting_options.json")
@@ -23,21 +22,46 @@
 
         const formData = values;
 
+        const CheckWifiButton = () => {
+          const loadingWifi = van.state(false);
+          const buttonLabel = van.state("Not connected.");
+
+          const onCheckWifi = () => {
+            buttonLabel.val = "Connecting...";
+            loadingWifi.val = true;
+            fetch("/check-wifi", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(formData),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                buttonLabel.val = data.result;
+                loadingWifi.val = false;
+              })
+              .catch((error) => {
+                buttonLabel.val = data.result;
+                loadingWifi.val = false;
+              });
+          };
+
+          return [
+            tags.label(van.derive(() => buttonLabel.val)),
+            tags.button(
+              {
+                onclick: onCheckWifi,
+                type: "submit",
+                disabled: van.derive(() => loadingWifi.val),
+              },
+              "Check Wifi",
+            ),
+          ];
+        };
+
         const onInput = (setting, e) =>
           (formData[setting.key] = e.target.value);
-
-        const onCheckWifi = () => {
-          fetch("/check-wifi", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-          })
-            .then((response) => response.json())
-            .then((data) => console.log(data))
-            .catch((error) => console.error("Error:", error));
-        };
 
         const onSave = () => {
           fetch("/settings", {
@@ -54,20 +78,23 @@
 
         const Input = ({ setting }) => {
           if (setting.type === "select") {
-            return select(
+            return tags.select(
               {
                 name: setting.name,
                 oninput: (e) => onInput(setting, e),
                 value: formData[setting.key] ? formData[setting.key] : null,
               },
-              setting.options.map((op) =>
-                op.value === formData[setting.key]
-                  ? option({ selected: true, value: op.value }, op.label)
-                  : option({ value: op.value }, op.label),
+              setting.options.map((option) =>
+                option.value === formData[setting.key]
+                  ? tags.option(
+                      { selected: true, value: option.value },
+                      option.label,
+                    )
+                  : tags.option({ value: option.value }, option.label),
               ),
             );
           }
-          return input({
+          return tags.input({
             type: setting.type,
             name: setting.name,
             oninput: (e) => onInput(setting, e),
@@ -76,25 +103,25 @@
           });
         };
 
-        return div(
+        return tags.div(
           ...groups.map((group) => [
-            h2(group.category),
+            tags.h2(group.category),
             ...group.settings.map((setting) => [
-              label(setting.label),
+              tags.label(setting.label),
               Input({ setting }),
             ]),
+            group.category === "Wi-Fi" ? CheckWifiButton() : null,
           ]),
-          div(
+          tags.div(
             { class: "grid" },
-            button({ onclick: onCheckWifi, type: "submit" }, "Check Wifi"),
-            button({ onclick: onSave, type: "submit" }, "Save"),
+            tags.button({ onclick: onSave, type: "submit" }, "Save"),
           ),
         );
       };
 
       (async () => {
         van.add(document.getElementById("main"), [
-          h1({ style: "--pico-color:var(--pico-primary)" }, "Settings"),
+          tags.h1({ style: "--pico-color:var(--pico-primary)" }, "Settings"),
           await Settings(),
         ]);
       })();

@@ -22,23 +22,46 @@
 
         const formData = values;
 
+        const CheckWifiButton = () => {
+          const loadingWifi = van.state(false);
+          const buttonLabel = van.state("Not connected.");
+
+          const onCheckWifi = () => {
+            buttonLabel.val = "Connecting...";
+            loadingWifi.val = true;
+            fetch("/check-wifi", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(formData),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                buttonLabel.val = data.result;
+                loadingWifi.val = false;
+              })
+              .catch((error) => {
+                buttonLabel.val = data.result;
+                loadingWifi.val = false;
+              });
+          };
+
+          return [
+            tags.label(van.derive(() => buttonLabel.val)),
+            tags.button(
+              {
+                onclick: onCheckWifi,
+                type: "submit",
+                disabled: van.derive(() => loadingWifi.val),
+              },
+              "Check Wifi",
+            ),
+          ];
+        };
+
         const onInput = (setting, e) =>
           (formData[setting.key] = e.target.value);
-
-        const steps = van.state(0);
-
-        const onCheckWifi = () => {
-          fetch("/check-wifi", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-          })
-            .then((response) => response.json())
-            .then((data) => console.log(data))
-            .catch((error) => console.error("Error:", error));
-        };
 
         const onSave = () => {
           fetch("/settings", {
@@ -87,12 +110,7 @@
               tags.label(setting.label),
               Input({ setting }),
             ]),
-            group.category === "Wi-Fi"
-              ? tags.button(
-                  { onclick: onCheckWifi, type: "submit" },
-                  "Check Wifi",
-                )
-              : null,
+            group.category === "Wi-Fi" ? CheckWifiButton() : null,
           ]),
           tags.div(
             { class: "grid" },

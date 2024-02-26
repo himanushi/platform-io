@@ -3,6 +3,7 @@
 #include <M5Unified.h>
 #include <SPIFFS.h>
 #include <WiFi.h>
+#include <esp_task_wdt.h>
 #include <map>
 #include <string>
 
@@ -60,20 +61,18 @@ void setup() {
           String password = doc["wifi_password"];
 
           WiFi.begin(ssid.c_str(), password.c_str());
+          // while でやると Task watchdog got triggered. The following tasks did
+          // not reset the watchdog in time が発生するため、一旦4秒待つ。
+          delay(4000);
 
-          unsigned long startTime = millis();
-
-          while (WiFi.status() != WL_CONNECTED) {
-            if (millis() - startTime > 5000) {
-              request->send(400, "application/json",
-                            "{\"result\":\"failed to connect\"}");
-              delete (String *)request->_tempObject;
-              return;
-            }
-            delay(500);
+          if (WiFi.status() == WL_CONNECTED) {
+            request->send(200, "application/json",
+                          "{\"result\":\"Connected!!!\"}");
+          } else {
+            request->send(400, "application/json",
+                          "{\"result\":\"Failed to connect.\"}");
           }
 
-          request->send(200, "application/json", "{}");
           delete (String *)request->_tempObject;
         }
       });
@@ -90,7 +89,7 @@ void setup() {
         if (index + len == total) {
           request->_tempFile.close();
         }
-        request->send(200, "application/json", "{}");
+        request->send(200, "application/json", "{\"result\":\"ok\"}");
       });
 
   server.begin();
