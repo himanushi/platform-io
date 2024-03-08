@@ -31,6 +31,10 @@
       "name": "ota",
       "path": "ota",
     },
+    {
+      "name": "mic",
+      "path": "mic",
+    },
   ],
   "settings": {
     "emeraldwalk.runonsave": {
