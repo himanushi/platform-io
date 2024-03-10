@@ -35,6 +35,10 @@
       "name": "mic",
       "path": "mic",
     },
+    {
+      "name": "png",
+      "path": "png",
+    },
   ],
   "settings": {
     "emeraldwalk.runonsave": {
