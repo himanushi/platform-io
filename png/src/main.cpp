@@ -1,18 +1,28 @@
-#include <Arduino.h>
+#include <M5Unified.h>
+#include <SPIFFS.h>
 
-// put function declarations here:
-int myFunction(int, int);
+M5GFX display;
+LGFX_Sprite sprite(&display);
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  M5.begin();
+  display.begin();
+  Serial.begin(115200);
+
+  if (!SPIFFS.begin(true)) {
+    M5.Lcd.println("SPIFFS Mount Failed");
+    return;
+  }
+
+  // Reset
+  sprite.setColorDepth(1);
+  sprite.createSprite(200, 200);
+  sprite.clear(TFT_WHITE);
+  sprite.pushSprite(0, 0);
+
+  // draw png
+  sprite.drawPixel(x, y, color);
+  sprite.pushSprite(0, 0);
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
-}
+void loop() {}
